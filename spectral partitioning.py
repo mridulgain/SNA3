@@ -4,45 +4,71 @@ import numpy as np
 import sys
 
 def unit_vector(v):
+	v = v.getA1()#handling type mismatch
 	temp = [x*x for x in v]
 	#print(temp)
 	denom = sum(temp) ** 0.5
 	#print(denom)
 	unit_vec = []
 	for i in range(len(v)):
-		unit_vec.append(round(v[i]/denom, 6))
+		unit_vec.append(round(v[i]/denom, 5))
 	unit_vec = np.matrix(unit_vec).getT()
 	return unit_vec
 
 def normalized(a):
+	a = a.getA1()# type compatibility
 	return round(sum([x*x for x in a])**0.5, 5)
 
 def leading_eigen_vector(adjacency_matrix):
 	order = adjacency_matrix.shape[0]
-	eigen_vector = [1] * order
-	eigen_vector = np.matrix(eigen_vector).getT()
+	#initial vector with all +ve components
+	eigen_vector = [3, 2] * (order // 2)
+	eigen_vector += [1] * (order % 2)
+	eigen_vector = np.matrix(eigen_vector).getT()#34x1 matrix
 	result = np.dot(adjacency_matrix, eigen_vector)
 	#print(result)#ok
-	normalized_val = normalized(result.getA1())
+	normalized_val = normalized(result)
 	#print(normalized_val)#ok
 	while(True):
-		eigen_vector = unit_vector(result.getA1())
+		eigen_vector = unit_vector(result)
 		#print(eigen_vector)#ok
 		result = np.dot(adjacency_matrix, eigen_vector)
-		current_normalized_val = normalized(result.getA1())
+		current_normalized_val = normalized(result)
 		if normalized_val - current_normalized_val == 0:
 			break
 		normalized_val = current_normalized_val
 		#print(normalized_val)
 	return eigen_vector
+def fiedler_vec(lev, l_mat):
+	order = lev.shape[0]
+	#initial vector with all +ve components
+	x = [3,4] * (order//2)
+	x += [1] * (order % 2)
+	x = np.matrix(x).getT()#34x1
+	c = float(np.dot(lev.getT(), x))
+	y = x - c * lev
+	print(y)
+	print(unit_vector(y))
+	it = 100
+	while(it > 0):
+		y = np.dot(l_mat.getT(), y)
+		
+		if it % 10 == 0:
+			c = float(np.dot(lev.getT(), y))
+			y = y - c * lev
+		it -= 1
+	print(y)
+
 
 
 if __name__ == '__main__':
 	try:
 		G = nx.read_edgelist(sys.argv[1])
 		#Community discovery by Modularity Maximization
-		m = nx.linalg.graphmatrix.adjacency_matrix(G)
-		print(m)
+		m = nx.linalg.laplacianmatrix.laplacian_matrix(G).todense()
+		lev = leading_eigen_vector(m)
+		#print(lev)
+		fiedler_vec(lev, m)
 		input()
 		#Graph partitioning usig Fiedler vector
 		fv = nx.linalg.algebraicconnectivity.fiedler_vector(G)

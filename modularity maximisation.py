@@ -4,6 +4,7 @@ import numpy as np
 import sys
 
 def unit_vector(v):
+	v = v.getA1()
 	temp = [x*x for x in v]
 	#print(temp)
 	denom = sum(temp) ** 0.5
@@ -15,6 +16,7 @@ def unit_vector(v):
 	return unit_vec
 
 def normalized(a):
+	a = a.getA1()
 	return round(sum([x*x for x in a])**0.5, 5)
 
 def leading_eigen_vector(adjacency_matrix):
@@ -23,13 +25,13 @@ def leading_eigen_vector(adjacency_matrix):
 	eigen_vector = np.matrix(eigen_vector).getT()
 	result = np.dot(adjacency_matrix, eigen_vector)
 	#print(result)#ok
-	normalized_val = normalized(result.getA1())
+	normalized_val = normalized(result)
 	#print(normalized_val)#ok
 	while(True):
-		eigen_vector = unit_vector(result.getA1())
+		eigen_vector = unit_vector(result)
 		#print(eigen_vector)#ok
 		result = np.dot(adjacency_matrix, eigen_vector)
-		current_normalized_val = normalized(result.getA1())
+		current_normalized_val = normalized(result)
 		if normalized_val - current_normalized_val == 0:
 			break
 		normalized_val = current_normalized_val
