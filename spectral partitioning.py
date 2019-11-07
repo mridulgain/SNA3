@@ -1,3 +1,4 @@
+#Graph partitioning by modularity maximisation
 import networkx as nx
 import numpy as np
 import sys
@@ -33,40 +34,31 @@ def leading_eigen_vector(adjacency_matrix):
 			break
 		normalized_val = current_normalized_val
 		#print(normalized_val)
-
 	return eigen_vector
 
-adj = ([0, 1, 0, 0, 0],
-		[1, 0, 0, 1, 0],
-		[0, 0, 0, 1, 1],
-		[0, 1, 1, 0, 1],
-		[0, 0, 1, 1, 0])
-adj2 = ([0,1,1,1,0,0,0,0],
-		[1,0,1,0,0,0,0,0],
-		[1,1,0,1,0,0,0,0],
-		[1,0,1,0,1,0,0,0],
-		[0,0,0,1,0,1,0,0],
-		[0,0,0,0,1,0,1,1],
-		[0,0,0,0,0,1,0,1],
-		[0,0,0,0,0,1,1,0])
-adj3 = ([0,1,1,0,0,0],
-		[1,0,1,0,0,0],
-		[1,1,0,1,0,0],
-		[0,0,1,0,1,1],
-		[0,0,0,1,0,1],
-		[0,0,0,1,1,0])
 
-G = nx.read_edgelist(sys.argv[1])
-m = nx.linalg.modularitymatrix.modularity_matrix(G)
-#m = np.matrix(adj3)
-no_of_vertices = m.shape[0]
-lev = leading_eigen_vector(m).getA1()
-#print(lev)
-c1 = []
-c2 = []
-for i in range(no_of_vertices):
-	if lev[i] < 0:
-		c2.append(i+1)
-	else:
-		c1.append(i+1)
-print(c1, c2)
+if __name__ == '__main__':
+	try:
+		G = nx.read_edgelist(sys.argv[1])
+		#Community discovery by Modularity Maximization
+		m = nx.linalg.graphmatrix.adjacency_matrix(G)
+		print(m)
+		input()
+		#Graph partitioning usig Fiedler vector
+		fv = nx.linalg.algebraicconnectivity.fiedler_vector(G)
+		c = sorted(range(len(fv)), key=lambda k: fv[k])
+		#Since this is a prititioning problem, we must specify partition sizes
+		c11 = set(i+1 for i in c[:16])
+		c12 = set(j+1 for j in c[16:])
+		print("Spectral partitioning (2 partition of size 16 & 18 respectively) using Fiedler vector -----")
+		print("Community 1 : ", c11)
+		print("Community 2 : ", c12)
+
+
+	except FileNotFoundError:
+		print("Check the file name you entered")
+	except IndexError:
+		print("Enter input file name as command line argument")
+		print("Usage : python leading_eigen_vector.py <file_name>")
+	except TypeError:
+		print("You should enter your graph in EDGE LIST format")
