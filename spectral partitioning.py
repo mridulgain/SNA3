@@ -39,7 +39,8 @@ def leading_eigen_vector(adjacency_matrix):
 		normalized_val = current_normalized_val
 		#print(normalized_val)
 	return eigen_vector
-def fiedler_vec(lev, l_mat):
+
+def eigenVec_2nd_smallest_eval(lev, l_mat):
 	order = lev.shape[0]
 	#initial vector with all +ve components
 	x = [3,4] * (order//2)
@@ -47,17 +48,15 @@ def fiedler_vec(lev, l_mat):
 	x = np.matrix(x).getT()#34x1
 	c = float(np.dot(lev.getT(), x))
 	y = x - c * lev
-	print(y)
-	print(unit_vector(y))
 	it = 100
 	while(it > 0):
-		y = np.dot(l_mat.getT(), y)
-		
+		y = np.dot(l_mat.getT(), y)		
 		if it % 10 == 0:
 			c = float(np.dot(lev.getT(), y))
 			y = y - c * lev
 		it -= 1
-	print(y)
+		y = unit_vector(y)
+	return y
 
 
 
@@ -68,17 +67,23 @@ if __name__ == '__main__':
 		m = nx.linalg.laplacianmatrix.laplacian_matrix(G).todense()
 		lev = leading_eigen_vector(m)
 		#print(lev)
-		fiedler_vec(lev, m)
-		input()
-		#Graph partitioning usig Fiedler vector
-		fv = nx.linalg.algebraicconnectivity.fiedler_vector(G)
+		fv = eigenVec_2nd_smallest_eval(lev, m)
 		c = sorted(range(len(fv)), key=lambda k: fv[k])
-		#Since this is a prititioning problem, we must specify partition sizes
 		c11 = set(i+1 for i in c[:16])
 		c12 = set(j+1 for j in c[16:])
 		print("Spectral partitioning (2 partition of size 16 & 18 respectively) using Fiedler vector -----")
 		print("Community 1 : ", c11)
 		print("Community 2 : ", c12)
+		#Graph partitioning usig Fiedler vector
+		fv = nx.linalg.algebraicconnectivity.fiedler_vector(G)
+		print(fv)
+		c = sorted(range(len(fv)), key=lambda k: fv[k])
+		#Since this is a prititioning problem, we must specify partition sizes
+		c21 = set(i+1 for i in c[:16])
+		c22 = set(j+1 for j in c[16:])
+		print("Spectral partitioning (2 partition of size 16 & 18 respectively) using Fiedler vector -----")
+		print("Community 1 : ", c21)
+		print("Community 2 : ", c22)
 
 
 	except FileNotFoundError:
