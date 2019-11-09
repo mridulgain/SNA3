@@ -2,9 +2,9 @@
 import networkx as nx
 import numpy as np
 import sys
-from common_helping_func import unit_vector
-from common_helping_func import normalized
-from common_helping_func import leading_eigen_vector
+from my_implementation import unit_vector
+from my_implementation import normalized
+from my_implementation import leading_eigen_vector
 
 if __name__ == '__main__':
 	try:
